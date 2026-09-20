@@ -1,0 +1,33 @@
+@prefix opt: <https://w3id.org/deltaopt#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/deltaopt> a owl:Ontology ; owl:versionInfo "0.1.0" .
+opt:OptimizationProblem a owl:Class .
+opt:DecisionVariable a owl:Class .
+opt:Parameter a owl:Class .
+opt:Requirement a owl:Class .
+opt:Objective a owl:Class .
+opt:Constraint a owl:Class .
+opt:CapacityConstraint a owl:Class ; rdfs:subClassOf opt:Constraint .
+opt:Version a owl:Class .
+opt:Patch a owl:Class .
+opt:hasObjective a owl:ObjectProperty ; rdfs:range opt:Objective .
+opt:usesVariable a owl:ObjectProperty ; rdfs:range opt:DecisionVariable .
+opt:usesParameter a owl:ObjectProperty ; rdfs:range opt:Parameter .
+opt:derivedFrom a owl:ObjectProperty ; rdfs:range opt:Requirement .
+opt:belongsTo a owl:ObjectProperty ; rdfs:range opt:OptimizationProblem .
+opt:dependsOn a owl:ObjectProperty .
+opt:supersedes a owl:ObjectProperty .
+opt:value a owl:DatatypeProperty .
+opt:domain a owl:DatatypeProperty .
+opt:category a owl:DatatypeProperty .
+opt:sense a owl:DatatypeProperty .
+opt:text a owl:DatatypeProperty .
+opt:processing_time a owl:DatatypeProperty .
+opt:profit a owl:DatatypeProperty .
+opt:minimum a owl:DatatypeProperty .
+opt:maximum a owl:DatatypeProperty .
+opt:validFrom a owl:DatatypeProperty ; rdfs:range xsd:integer .
+opt:recordedAt a owl:DatatypeProperty ; rdfs:range xsd:integer .

@@ -1,23 +1,14 @@
-# deltaopt
+# DeltaOpt v0.1
 
 **Ontology-Constrained Temporal Graph Agents for Evolving Optimization Models**
 
-Deltaopt is a small, executable research prototype for applying natural-language model changes as validated graph patches. Its vertical slice uses production planning: a plant has capacity and products have demand bounds, processing time, category, and cost.
+A runnable research prototype for changing an optimization model through small,
+validated graph patches. The first domain is integer production planning:
+maximize profit under one machine-capacity constraint and per-product bounds.
 
-## What actually works
+## Run locally
 
-- strict Pydantic `GraphPatch` protocol, optimistic version checks, preconditions, allow-listed replacement paths, atomic rollback;
-- Protégé-openable OWL/Turtle ontology and the SHACL shapes actually loaded at runtime;
-- separate valid time and recorded time, append-only versions, historical snapshots, source chains, and declared-dependency impact tracing;
-- semantic verification via `pyshacl` and optimization verification via SciPy `milp`;
-- deterministic offline replay for legal, semantic-invalid, feasible-invalid, and late-revision cases;
-- isolated OpenAI-compatible provider interface (not called by demo/tests);
-- runnable mock evaluation interfaces for full regeneration, patch-only, and ontology-constrained temporal patches;
-- tests and GitHub Actions CI.
-
-No Semantica runtime code is integrated. See [reuse boundary](docs/PROVENANCE.md). Dependency impact is not causal inference. Solver verification proves properties of the encoded model only; it does not automatically verify that natural-language intent was captured correctly.
-
-## Quick start
+Requires Python 3.11 or newer. No API key or commercial solver is needed.
 
 ```bash
 python -m venv .venv
@@ -28,38 +19,77 @@ deltaopt evaluate
 pytest
 ```
 
-The demo needs no API key. It prints an explicit `offline deterministic replay` label. To build a real-model experiment, instantiate `OpenAICompatibleProvider`; credentials are read only from `DELTAOPT_API_KEY`, and real runs must be reported separately from replay.
+The demo changes capacity from **8 to 6 hours**, patches only `/capacity`, and
+solves the encoded MILP: the optimum changes from **13 to 10**. It then restores
+the original model with an append-only rollback commit (objective **13**).
+Products A/B have processing times 2/3, profits 3/5 and bounds 0–4/0–2.
 
-## Expected demo behavior
+## Implemented
 
-1. capacity increase: accepted, SHACL-valid, MILP-feasible;
-2. unknown category: rejected by SHACL even though the numeric model could solve;
-3. excessive required demand: SHACL-valid but rejected as MILP-infeasible;
-4. late correction: accepted, invisible in an earlier recorded-time snapshot and visible later;
-5. rejected candidates leave model version/state unchanged.
+- Typed Python model and strict structured patch protocol; allowlisted paths,
+  base-version checks, old-value preconditions, copy-on-write application.
+- Optimization RDF graph with requirement provenance and dependency impact.
+- Protégé-openable OWL vocabulary and runtime SHACL checks with `pyshacl`.
+- SciPy/HiGHS integer optimization verifier with independent result checks.
+- In-memory temporal commits, valid/recorded timestamps, historical snapshots,
+  rejected-candidate isolation, and rollback as a new version.
+- Offline replay agent plus an injected provider protocol.
+- Semantica bridge export containing RDF, versions, provenance and patch records;
+  a caller-supplied `GraphSink` can receive this payload.
+- Executable baseline/evaluation scaffolding and regression tests.
 
-## Evaluation scaffolding
+## Architecture
 
-`deltaopt evaluate` uses the same fixture data for all methods and reports semantic valid rate inputs, feasibility, constraint preservation, patch scope, traceability completeness, character-count proxies, and elapsed time. Current baseline generation is deterministic replay simulation, **not a real LLM experiment**. Full-regeneration expands the candidate to all leaf fields; the other methods emit local patches. See [research questions](docs/RESEARCH.md) and [architecture](docs/ARCHITECTURE.md).
+```text
+Requirement -> provider/replay -> structured patch -> impact localization
+                                      |
+                         schema + version + preconditions
+                                      |
+                            copy-on-write candidate
+                                      |
+                       RDF/SHACL -> MILP verification
+                                      |
+                            temporal commit / reject
+                                      |
+                         bridge export / history / rollback
+```
 
-## Layout
+## Project map
 
-- `src/deltaopt/`: runtime, agent/provider boundary, validators, MILP, demo, evaluation
-- `ontology/deltaopt.ttl`: OWL ontology
-- `ontology/shapes/production.shacl.ttl`: runtime SHACL constraints
-- `fixtures/`: offline replay and initial model
-- `tests/`: end-to-end and safety behavior
-- `docs/`: architecture, hypotheses, audited reuse/source record
+| Path | Purpose |
+| --- | --- |
+| `src/deltaopt/` | Model, RDF, patch, agent, verifier, temporal store, bridge, CLI |
+| `ontology/optimization.ttl` | OWL vocabulary, opens in Protégé |
+| `ontology/shapes.ttl` | Operational SHACL rules |
+| `src/deltaopt/resources/` | Packaged copies of ontology assets, parity-tested |
+| `tests/` | Positive, negative, solver, temporal, bridge and replay coverage |
+| `benchmarks/` | Smoke benchmark instructions and planned dataset contract |
+| `docs/` | Research plan, architecture and provenance boundaries |
 
-## Limits / next research steps
+## Research status and limits
 
-- single-plant, single-capacity production model; no setup times, calendars, uncertainty, or multi-objective optimization;
-- event replay has one valid-from boundary per patch rather than full interval supersession/conflict resolution;
-- no real-provider benchmark, human intent labels, statistical claims, or paper results;
-- OWL reasoning is not enabled; operational constraints are SHACL plus typed Python schema;
-- no Semantica adapter; upstream compatibility is not claimed;
-- provider output extraction assumes clean JSON and should gain hardened JSON-mode/tool-call adapters for production.
+This is **offline deterministic replay**, not a trained or evaluated LLM agent.
+`PatchProvider` is an interface; no real LLM provider is configured or called.
+Full regeneration and patch-only evaluation use deterministic candidates, so
+their outputs are infrastructure checks, not evidence of method superiority.
 
-## License
+The Semantica bridge is a vendor-neutral export contract, **not a native
+Semantica runtime integration**. Dependency tracing is not causal inference.
+SHACL checks the projected structure and selected domain rules; it does not
+prove correspondence with arbitrary natural-language requirements. The solver
+verifies the encoded model only. OWL DL consistency checking is not implemented.
 
-MIT. The independent project's license is in `LICENSE`; upstream audit details and attribution boundary are documented separately.
+Temporal snapshots select the latest recorded eligible full-state commit.
+This supports the demo's late correction, but not general interval supersession
+or merging independent retroactive changes. State is in memory; durable storage,
+multiwriter concurrency, add/remove graph operations and repair memory remain
+future work. See [architecture](docs/architecture.md) and
+[research plan](docs/research_plan.md).
+
+## Provenance
+
+This completion implements the scope recovered from the prior conversation and
+the existing repository scaffold. The prior conversation's downloadable source
+archive was not available, so byte-for-byte recovery of that archive is not
+claimed. Existing MIT licensing is retained. No code from `cusz-semantic` is
+copied or modified; see [reuse boundary](docs/provenance.md).

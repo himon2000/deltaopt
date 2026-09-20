@@ -1,0 +1,25 @@
+@prefix opt: <https://w3id.org/deltaopt#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+opt:ProblemShape a sh:NodeShape ; sh:targetClass opt:OptimizationProblem ;
+    sh:property [ sh:path opt:hasObjective ; sh:minCount 1 ; sh:maxCount 1 ; sh:class opt:Objective ] .
+opt:VariableShape a sh:NodeShape ; sh:targetClass opt:DecisionVariable ;
+    sh:property [ sh:path opt:domain ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ("integer") ] ;
+    sh:property [ sh:path opt:category ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ("standard" "premium") ] ;
+    sh:property [ sh:path opt:belongsTo ; sh:minCount 1 ; sh:maxCount 1 ; sh:class opt:OptimizationProblem ] ;
+    sh:property [ sh:path opt:derivedFrom ; sh:minCount 1 ; sh:class opt:Requirement ] ;
+    sh:property [ sh:path opt:minimum ; sh:minCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ; sh:lessThanOrEquals opt:maximum ] ;
+    sh:property [ sh:path opt:maximum ; sh:minCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ] ;
+    sh:property [ sh:path opt:processing_time ; sh:minCount 1 ; sh:minExclusive 0 ] .
+opt:ConstraintShape a sh:NodeShape ; sh:targetClass opt:Constraint ;
+    sh:property [ sh:path opt:usesVariable ; sh:minCount 1 ; sh:class opt:DecisionVariable ] ;
+    sh:property [ sh:path opt:derivedFrom ; sh:minCount 1 ; sh:class opt:Requirement ] .
+opt:ObjectiveShape a sh:NodeShape ; sh:targetClass opt:Objective ;
+    sh:property [ sh:path opt:sense ; sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue "maximize" ] ;
+    sh:property [ sh:path opt:usesVariable ; sh:minCount 1 ; sh:class opt:DecisionVariable ] ;
+    sh:property [ sh:path opt:derivedFrom ; sh:minCount 1 ; sh:class opt:Requirement ] .
+opt:ParameterShape a sh:NodeShape ; sh:targetClass opt:Parameter ;
+    sh:property [ sh:path opt:value ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:double ; sh:minInclusive 0 ] .
+opt:RequirementShape a sh:NodeShape ; sh:targetClass opt:Requirement ;
+    sh:property [ sh:path opt:text ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .

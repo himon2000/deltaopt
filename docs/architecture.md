@@ -23,7 +23,15 @@ time bounds. This is a deliberately limited snapshot semantics, not a complete
 bitemporal database: a later full snapshot can carry changes with unrelated
 valid times. Do not use it for independent overlapping retroactive updates.
 
-The bridge exports a versioned vendor-neutral payload. To connect an actual
-Semantica deployment, implement GraphSink.ingest against a pinned SDK version
-and test roundtrip identity, timestamps, provenance and idempotent retries.
-There is no inferred causal semantics and no external service call in v0.1.
+The original bridge exports a versioned vendor-neutral payload. The v0.2 native
+adapter below handles the pinned in-memory Semantica integration. Connecting an
+external persistent deployment through GraphSink.ingest remains future work,
+including idempotent retries and durable storage.
+There is no inferred causal semantics or external service call.
+
+v0.2 adds an optional native adapter and a frozen-by-copy OntologyContract.
+Store accepts a semantic verifier so custom ontology/SHACL constraints gate
+both initial state and all later commits/rollbacks. The adapter materializes
+RDFS classes/properties without replacing datatype-distinct numeric literals,
+then uses native Semantica SHACL validation. Full RDF is preserved alongside
+the upstream ontology index. See [integration guide](protege_semantica.md).

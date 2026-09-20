@@ -43,7 +43,8 @@ cases only after collecting real repeated experiments with held-out labels.
 
 ## Milestones
 
-v0.1: runnable offline vertical slice (this repository).
-Next: durable provenance, complete temporal semantics and audited native Semantica
-adapter; add/remove IR operations; provider integration and held-out sequences;
+v0.1: runnable offline vertical slice.
+v0.2: Protégé ontology loading and audited native Semantica offline integration.
+Next: durable provenance, complete temporal semantics;
+add/remove IR operations; provider integration and held-out sequences;
 then baseline experiments, ablations, repair memory and research report.

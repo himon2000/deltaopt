@@ -18,3 +18,27 @@ jobs:
       - run: ruff check .
       - run: deltaopt demo
       - run: deltaopt evaluate
+  semantica-integration:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: himon2000/cusz-semantic
+          ref: 8bb1803fc1d2da6c3056e88af2dd101f6c32829e
+          path: .reference/cusz-semantic
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e '.[dev,semantica]'
+      - name: Verify native Semantica without APIs
+        env:
+          PYTHONPATH: .reference/cusz-semantic/backend
+          SEMANTICA_DISABLE_PROGRESS: '1'
+        run: |
+          python -c 'from semantica.kg import KnowledgeGraph; from semantica.ontology import OntologyEngine'
+          pytest
+          deltaopt semantic-demo --output artifacts/native

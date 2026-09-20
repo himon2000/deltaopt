@@ -1,4 +1,4 @@
-# DeltaOpt v0.1
+# DeltaOpt v0.2
 
 **Ontology-Constrained Temporal Graph Agents for Evolving Optimization Models**
 
@@ -23,6 +23,18 @@ The demo changes capacity from **8 to 6 hours**, patches only `/capacity`, and
 solves the encoded MILP: the optimum changes from **13 to 10**. It then restores
 the original model with an append-only rollback commit (objective **13**).
 Products A/B have processing times 2/3, profits 3/5 and bounds 0–4/0–2.
+
+## Protégé + native Semantica (offline)
+
+v0.2 loads locally edited Turtle/RDF/XML ontologies and SHACL shapes, validates
+patches through the actual Semantica engine from `cusz-semantic`, builds native
+temporal knowledge graphs, and exports an OWL project for Protégé inspection.
+No API key is needed; the model provider is explicitly disabled.
+
+See [setup and editing guide](docs/protege_semantica.md) for the pinned source
+checkout and `deltaopt semantic-demo --output artifacts/first-run` command.
+Custom contract rules gate commits; tests cover a new ontology superclass plus
+a SHACL capacity rule that rejects the 6h patch while accepting the initial 8h.
 
 ## Implemented
 
@@ -73,13 +85,15 @@ This is **offline deterministic replay**, not a trained or evaluated LLM agent.
 Full regeneration and patch-only evaluation use deterministic candidates, so
 their outputs are infrastructure checks, not evidence of method superiority.
 
-The Semantica bridge is a vendor-neutral export contract, **not a native
-Semantica runtime integration**. Dependency tracing is not causal inference.
+The original Semantica bridge remains a vendor-neutral export contract. The
+optional v0.2 adapter uses native ontology, validation, KG and temporal APIs;
+it does not run Semantica's web application or persistent graph database.
+Dependency tracing is not causal inference.
 SHACL checks the projected structure and selected domain rules; it does not
 prove correspondence with arbitrary natural-language requirements. The solver
 verifies the encoded model only. OWL DL consistency checking is not implemented.
 
-Temporal snapshots select the latest recorded eligible full-state commit.
+Temporal snapshots, including the native adapter, select the latest recorded eligible full-state commit.
 This supports the demo's late correction, but not general interval supersession
 or merging independent retroactive changes. State is in memory; durable storage,
 multiwriter concurrency, add/remove graph operations and repair memory remain
@@ -91,5 +105,6 @@ future work. See [architecture](docs/architecture.md) and
 This completion implements the scope recovered from the prior conversation and
 the existing repository scaffold. The prior conversation's downloadable source
 archive was not available, so byte-for-byte recovery of that archive is not
-claimed. Existing MIT licensing is retained. No code from `cusz-semantic` is
-copied or modified; see [reuse boundary](docs/provenance.md).
+claimed. Existing MIT licensing is retained. Native integration imports the
+pinned `cusz-semantic` checkout without copying or modifying its source;
+see [reuse boundary](docs/provenance.md).

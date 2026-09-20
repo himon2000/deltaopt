@@ -20,13 +20,13 @@ class Version:
 
 
 class Store:
-    def __init__(self, model: Model):
+    def __init__(self, model: Model, *, semantic_verifier=None):
+        self._semantic_verifier = semantic_verifier or semantic.verify
         self._check(model)
         self._versions = [Version(1, None, 0, 0, model.source, model.model_copy(deep=True))]
 
-    @staticmethod
-    def _check(model):
-        ok, report = semantic.verify(model)
+    def _check(self, model):
+        ok, report = self._semantic_verifier(model)
         if not ok:
             raise ValueError("semantic rejection: " + report)
         if solver.verify(model).status != "optimal":
